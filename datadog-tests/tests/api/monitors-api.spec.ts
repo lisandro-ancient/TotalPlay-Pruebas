@@ -71,6 +71,50 @@ test.describe('Users API', () => {
     expect(body.data).not.toHaveProperty('password');
   });
 
+  // USR-03 — Listar usuarios (paginado)
+  test('GET /api/users supports pagination with page and limit', async ({ request }) => {
+    const response = await request.get(`${BASE_URL}/api/users?page=1&limit=2`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    expect(response.status()).toBe(200);
+    const body = await response.json();
+    expect(body.error).toBeNull();
+    expect(body.timestamp).toEqual(expect.any(Number));
+    expect(body.data.users).toBeInstanceOf(Array);
+    expect(body.data.users.length).toBeLessThanOrEqual(2);
+    expect(body.data.total).toBeGreaterThan(0);
+  });
+
+  test('GET /api/users supports search query param', async ({ request }) => {
+    const response = await request.get(`${BASE_URL}/api/users?page=1&limit=10&search=Admin`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    expect(response.status()).toBe(200);
+    const body = await response.json();
+    expect(body.error).toBeNull();
+    expect(body.timestamp).toEqual(expect.any(Number));
+    expect(body.data.users.length).toBeGreaterThan(0);
+    expect(body.data.total).toBe(1);
+    expect(body.data.users[0]).toMatchObject({
+      id: expect.stringMatching(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/),
+      firstName: 'Admin',
+    });
+  });
+
+  test('GET /api/users returns empty list for non-matching search', async ({ request }) => {
+    const response = await request.get(`${BASE_URL}/api/users?page=1&limit=10&search=NonExistentUser999`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    expect(response.status()).toBe(200);
+    const body = await response.json();
+    expect(body.error).toBeNull();
+    expect(body.data.users).toHaveLength(0);
+    expect(body.data.total).toBe(0);
+  });
+
   // USR-02 — Email duplicado
   test('POST /api/users returns 409 for duplicate email', async ({ request }) => {
     const response = await request.post(`${BASE_URL}/api/users`, {
