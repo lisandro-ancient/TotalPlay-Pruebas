@@ -166,8 +166,6 @@ jobs:
     if: always()
     permissions:
       contents: write
-      pages: write
-      id-token: write
     steps:
       - uses: actions/checkout@v4
 
@@ -192,18 +190,15 @@ jobs:
             cp -r gh-pages/history/. allure-results-combined/history/
           fi
 
+      - name: Install Allure CLI
+        run: npm install -g allure-commandline --silent
+
       - name: Generate Allure report
-        uses: simple-elf/allure-report-action@v1.9
-        with:
-          allure_results: allure-results-combined
-          allure_report: allure-report
-          allure_history: allure-history
-          keep_reports: 30
+        run: allure generate allure-results-combined --clean -o allure-report
 
       - name: Publish report to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
-          publish_dir: allure-history
-          destination_dir: .
+          publish_dir: allure-report
