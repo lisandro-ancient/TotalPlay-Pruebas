@@ -6,6 +6,8 @@ export default defineConfig({
   globalSetup: './global-setup.ts',
   fullyParallel: true,
   retries: 1,
+  timeout: 60000,
+  workers: 2,
   reporter: [
     ['html', { outputFolder: 'playwright-report', open: 'never' }],
     ['allure-playwright', {

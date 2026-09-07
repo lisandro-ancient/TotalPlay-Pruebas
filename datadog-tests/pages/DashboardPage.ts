@@ -20,6 +20,6 @@ export class DashboardPage {
 
   async navigateTo(path: string) {
     await this.page.goto(path, { waitUntil: 'domcontentloaded' });
-    await this.page.waitForTimeout(5000);
+    await this.page.waitForTimeout(4000);
   }
 }

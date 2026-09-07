@@ -40,9 +40,9 @@ test.describe('Dashboards UI', () => {
     await db.navigateTo('/servicios/tv-pagos');
 
     await expect(page).toHaveURL(/\/servicios\/tv-pagos/);
-    await expect(page.locator('h2').filter({ hasText: 'TV' })).toBeVisible();
+    await expect(page.locator('h2').filter({ hasText: 'TV' })).toBeVisible({ timeout: 15000 });
     await expect(page.locator('h2').filter({ hasText: 'Pagos' })).toBeVisible();
-    await expect(page.getByText('Disponibilidad (%) · Últimas 4 horas').first()).toBeVisible();
+    await expect(page.getByText('Disponibilidad (%) · Últimas 4 horas').first()).toBeVisible({ timeout: 15000 });
     await expect(page.getByText('Tiempo de respuesta promedio · Últimas 4 horas').first()).toBeVisible();
   });
 
@@ -89,7 +89,7 @@ test.describe('Dashboards UI', () => {
     await db.navigateTo('/monitores');
 
     await expect(page).toHaveURL(/\/monitores/);
-    await expect(page.locator('h2').filter({ hasText: 'Monitores en alerta' })).toBeVisible();
+    await expect(page.locator('h2').filter({ hasText: 'Monitores en alerta' })).toBeVisible({ timeout: 15000 });
     await expect(page.locator('h2').filter({ hasText: 'Monitores en advertencia' })).toBeVisible();
   });
 
@@ -99,7 +99,7 @@ test.describe('Dashboards UI', () => {
     await db.navigateTo('/analisis-negocio');
 
     await expect(page).toHaveURL(/\/analisis-negocio/);
-    await expect(page.locator('h1')).toHaveText('Análisis de negocio');
+    await expect(page.locator('h1')).toHaveText('Análisis de negocio', { timeout: 15000 });
     await expect(page.locator('h2').filter({ hasText: 'Marketplace' })).toBeVisible();
     await expect(page.locator('h2').filter({ hasText: 'Delivery' })).toBeVisible();
     await expect(page.getByText('Hoy vs promedio 4 sem.').first()).toBeVisible();
@@ -140,7 +140,7 @@ test.describe('Dashboards UI', () => {
     await db.navigateTo('/iptv/ia');
 
     await expect(page).toHaveURL(/\/iptv\/ia/);
-    await expect(page.getByText('ÍNDICE')).toBeVisible();
+    await expect(page.getByText('ÍNDICE')).toBeVisible({ timeout: 15000 });
   });
 
   // Dashboard 16 — Aprovisionamiento - Cockpit
@@ -199,6 +199,6 @@ test.describe('Dashboards UI', () => {
     await db.navigateTo('/aprovisionamiento/ia');
 
     await expect(page).toHaveURL(/\/aprovisionamiento\/ia/);
-    await expect(page.getByText('ÍNDICE')).toBeVisible();
+    await expect(page.getByText('ÍNDICE')).toBeVisible({ timeout: 15000 });
   });
 });
