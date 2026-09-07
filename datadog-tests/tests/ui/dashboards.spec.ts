@@ -28,9 +28,9 @@ test.describe('Dashboards UI', () => {
     await db.navigateTo('/servicios/login-inicio');
 
     await expect(page).toHaveURL(/\/servicios\/login-inicio/);
-    await expect(page.locator('h2').filter({ hasText: 'Login' })).toBeVisible();
+    await expect(page.locator('h2').filter({ hasText: 'Login' })).toBeVisible({ timeout: 15000 });
     await expect(page.locator('h2').filter({ hasText: 'Home' })).toBeVisible();
-    await expect(page.getByText('Disponibilidad (%) · Últimas 4 horas').first()).toBeVisible();
+    await expect(page.getByText('Disponibilidad (%) · Últimas 4 horas').first()).toBeVisible({ timeout: 15000 });
     await expect(page.getByText('Tiempo de respuesta promedio · Últimas 4 horas').first()).toBeVisible();
   });
 

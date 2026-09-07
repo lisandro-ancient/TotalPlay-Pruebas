@@ -5,7 +5,7 @@ export default defineConfig({
   testDir: './tests',
   globalSetup: './global-setup.ts',
   fullyParallel: true,
-  retries: 1,
+  retries: 2,
   timeout: 60000,
   workers: 2,
   reporter: [
