@@ -6,38 +6,67 @@
 
 # Test info
 
-- Name: ui/dashboards.spec.ts >> Dashboards UI >> 14 · Servicio IPTV - Servicios
-- Location: tests/ui/dashboards.spec.ts:123:7
+- Name: ui/dashboards.spec.ts >> Dashboards UI >> 01 · App de Clientes - Robot Sintético
+- Location: tests/ui/dashboards.spec.ts:13:7
 
 # Error details
 
 ```
 Error: expect(locator).toBeVisible() failed
 
-Locator: locator('h2').filter({ hasText: 'Nueva Interfaz' })
+Locator: getByText('SOLICITUDES PROCESADAS CORRECTAMENTE')
 Expected: visible
-Timeout: 5000ms
+Timeout: 10000ms
 Error: element(s) not found
 
 Call log:
-  - Expect "toBeVisible" with timeout 5000ms
-  - waiting for locator('h2').filter({ hasText: 'Nueva Interfaz' })
+  - Expect "toBeVisible" with timeout 10000ms
+  - waiting for getByText('SOLICITUDES PROCESADAS CORRECTAMENTE')
 
 ```
 
 ```yaml
-- main "Los seis servicios de IPTV":
-  - paragraph: Pantalla 02 · Servicios
-  - heading "Los seis servicios de IPTV" [level=1]
-  - paragraph: Disponibilidad y tiempo de respuesta por servicio
 - link "Volver al índice":
   - /url: /
   - text: ÍNDICE
+- main "Disponibilidad de la App de Clientes":
+  - paragraph: TOTALPLAY · NOC
+  - heading "App de Clientes" [level=1]
+  - paragraph: CONSULTANDO DATADOG
 ```
 
 # Test source
 
 ```ts
+  1   | import { test, expect } from '@playwright/test';
+  2   | import { DashboardPage } from '../../pages/DashboardPage';
+  3   | 
+  4   | test.describe('Dashboards UI', () => {
+  5   |   test('should display 20 dashboards on the index', async ({ page }) => {
+  6   |     const dashboardPage = new DashboardPage(page);
+  7   |     await dashboardPage.goto();
+  8   |     await dashboardPage.expectLoaded();
+  9   |     expect(await dashboardPage.getDashboardCount()).toBe(20);
+  10  |   });
+  11  | 
+  12  |   // Dashboard 01 — App de Clientes - Robot Sintético
+  13  |   test('01 · App de Clientes - Robot Sintético', async ({ page }) => {
+  14  |     const db = new DashboardPage(page);
+  15  |     await db.navigateTo('/app-clientes');
+  16  | 
+  17  |     await expect(page).toHaveURL(/\/app-clientes/);
+  18  |     await expect(page.locator('h1')).toHaveText('App de Clientes');
+> 19  |     await expect(page.getByText('SOLICITUDES PROCESADAS CORRECTAMENTE')).toBeVisible({ timeout: 10000 });
+      |                                                                          ^ Error: expect(locator).toBeVisible() failed
+  20  |     await expect(page.getByText('SOLICITUDES NO COMPLETADAS POR DATOS INVÁLIDOS DEL CLIENTE')).toBeVisible();
+  21  |     await expect(page.getByText('SOLICITUDES NO COMPLETADAS POR FALLA DEL SISTEMA')).toBeVisible();
+  22  |     await expect(page.getByText('TIEMPO DE RESPUESTA PROMEDIO')).toBeVisible();
+  23  |   });
+  24  | 
+  25  |   // Dashboard 05 — Login - Inicio
+  26  |   test('05 · Login - Inicio', async ({ page }) => {
+  27  |     const db = new DashboardPage(page);
+  28  |     await db.navigateTo('/servicios/login-inicio');
   29  | 
   30  |     await expect(page).toHaveURL(/\/servicios\/login-inicio/);
   31  |     await expect(page.locator('h2').filter({ hasText: 'Login' })).toBeVisible({ timeout: 15000 });
@@ -129,91 +158,4 @@ Call log:
   117 |     await expect(page.getByText('Solicitudes no completadas por datos inválidos del cliente')).toBeVisible();
   118 |     await expect(page.getByText('Solicitudes no completadas por falla del sistema')).toBeVisible();
   119 |     await expect(page.getByText('Tiempo de respuesta')).toBeVisible();
-  120 |   });
-  121 | 
-  122 |   // Dashboard 14 — Servicio IPTV - Servicios
-  123 |   test('14 · Servicio IPTV - Servicios', async ({ page }) => {
-  124 |     const db = new DashboardPage(page);
-  125 |     await db.navigateTo('/iptv/servicios');
-  126 | 
-  127 |     await expect(page).toHaveURL(/\/iptv\/servicios/);
-  128 |     await expect(page.locator('h1')).toHaveText('Los seis servicios de IPTV');
-> 129 |     await expect(page.locator('h2').filter({ hasText: 'Nueva Interfaz' })).toBeVisible();
-      |                                                                            ^ Error: expect(locator).toBeVisible() failed
-  130 |     await expect(page.locator('h2').filter({ hasText: 'Guía de programación' })).toBeVisible();
-  131 |     await expect(page.locator('h2').filter({ hasText: 'APPS' })).toBeVisible();
-  132 |     await expect(page.locator('h2').filter({ hasText: 'On Demand' })).toBeVisible();
-  133 |     await expect(page.locator('h2').filter({ hasText: 'Red WiFi' })).toBeVisible();
-  134 |     await expect(page.locator('h2').filter({ hasText: 'Ajustes' })).toBeVisible();
-  135 |   });
-  136 | 
-  137 |   // Dashboard 15 — Servicio IPTV - IA
-  138 |   test('15 · Servicio IPTV - IA', async ({ page }) => {
-  139 |     const db = new DashboardPage(page);
-  140 |     await db.navigateTo('/iptv/ia');
-  141 | 
-  142 |     await expect(page).toHaveURL(/\/iptv\/ia/);
-  143 |     await expect(page.getByText('ÍNDICE')).toBeVisible({ timeout: 15000 });
-  144 |   });
-  145 | 
-  146 |   // Dashboard 16 — Aprovisionamiento - Cockpit
-  147 |   test('16 · Aprovisionamiento - Cockpit', async ({ page }) => {
-  148 |     const db = new DashboardPage(page);
-  149 |     await db.navigateTo('/aprovisionamiento/cockpit');
-  150 | 
-  151 |     await expect(page).toHaveURL(/\/aprovisionamiento\/cockpit/);
-  152 |     await expect(page.locator('h1')).toHaveText('Aprovisionamiento residencial');
-  153 |     await expect(page.getByText('ESTADO GENERAL')).toBeVisible();
-  154 |     await expect(page.getByText('Activaciones exitosas')).toBeVisible();
-  155 |     await expect(page.getByText('Activaciones con error')).toBeVisible();
-  156 |     await expect(page.getByText('Activaciones sin respuesta')).toBeVisible();
-  157 |     await expect(page.getByText('Total de eventos en la red')).toBeVisible();
-  158 |     await expect(page.getByText('Soportes manuales')).toBeVisible();
-  159 |   });
-  160 | 
-  161 |   // Dashboard 17 — Aprovisionamiento - Origen
-  162 |   test('17 · Aprovisionamiento - Origen', async ({ page }) => {
-  163 |     const db = new DashboardPage(page);
-  164 |     await db.navigateTo('/aprovisionamiento/origen');
-  165 | 
-  166 |     await expect(page).toHaveURL(/\/aprovisionamiento\/origen/);
-  167 |     await expect(page.locator('h1')).toHaveText('Origen y alta de servicio');
-  168 |     await expect(page.locator('h2').filter({ hasText: 'Origen App FFM / UX' })).toBeVisible();
-  169 |     await expect(page.locator('h2').filter({ hasText: 'Alta BRM' })).toBeVisible();
-  170 |     await expect(page.locator('h2').filter({ hasText: 'Carga Sistema' })).toBeVisible();
-  171 |     await expect(page.locator('h2').filter({ hasText: 'Alta IMS' })).toBeVisible();
-  172 |   });
-  173 | 
-  174 |   // Dashboard 18 — Aprovisionamiento - Activación
-  175 |   test('18 · Aprovisionamiento - Activación', async ({ page }) => {
-  176 |     const db = new DashboardPage(page);
-  177 |     await db.navigateTo('/aprovisionamiento/activacion');
-  178 | 
-  179 |     await expect(page).toHaveURL(/\/aprovisionamiento\/activacion/);
-  180 |     await expect(page.locator('h1')).toHaveText('Activación y asignación');
-  181 |     await expect(page.locator('h2').filter({ hasText: 'Creación Usuario AAA' })).toBeVisible();
-  182 |     await expect(page.locator('h2').filter({ hasText: 'Autofind' })).toBeVisible();
-  183 |     await expect(page.locator('h2').filter({ hasText: 'Genera DN' })).toBeVisible();
-  184 |     await expect(page.locator('h2').filter({ hasText: 'Gestor Asignado' })).toBeVisible();
-  185 |   });
-  186 | 
-  187 |   // Dashboard 19 — Aprovisionamiento - Gestores
-  188 |   test('19 · Aprovisionamiento - Gestores', async ({ page }) => {
-  189 |     const db = new DashboardPage(page);
-  190 |     await db.navigateTo('/aprovisionamiento/gestores');
-  191 | 
-  192 |     await expect(page).toHaveURL(/\/aprovisionamiento\/gestores/);
-  193 |     await expect(page.locator('h1')).toHaveText('Efectividad según gestor');
-  194 |   });
-  195 | 
-  196 |   // Dashboard 20 — Aprovisionamiento - IA
-  197 |   test('20 · Aprovisionamiento - IA', async ({ page }) => {
-  198 |     const db = new DashboardPage(page);
-  199 |     await db.navigateTo('/aprovisionamiento/ia');
-  200 | 
-  201 |     await expect(page).toHaveURL(/\/aprovisionamiento\/ia/);
-  202 |     await expect(page.getByText('ÍNDICE')).toBeVisible({ timeout: 15000 });
-  203 |   });
-  204 | });
-  205 | 
 ```
