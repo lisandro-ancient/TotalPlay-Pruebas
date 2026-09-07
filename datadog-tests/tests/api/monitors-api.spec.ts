@@ -48,6 +48,56 @@ test.describe('Users API', () => {
     expect(response.status()).toBe(401);
   });
 
+  // USR-04 — Actualizar usuario
+  test('PATCH /api/users/:id updates user fields', async ({ request }) => {
+    const createRes = await request.post(`${BASE_URL}/api/users`, {
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      data: { email: `usr04.${Date.now()}@example.com`, password: 'password123', firstName: 'Original', lastName: 'User', role: 'admin' },
+    });
+    const { data: created } = await createRes.json();
+
+    const response = await request.patch(`${BASE_URL}/api/users/${created.id}`, {
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      data: { firstName: 'Arielito Modificado', role: 'user' },
+    });
+
+    expect(response.status()).toBe(200);
+    const body = await response.json();
+    expect(body.error).toBeNull();
+    expect(body.timestamp).toEqual(expect.any(Number));
+    expect(body.data).toMatchObject({
+      id: created.id,
+      firstName: 'Arielito Modificado',
+      role: 'user',
+      email: created.email,
+    });
+    expect(body.data.updatedAt).not.toBe(created.updatedAt);
+    expect(body.data).not.toHaveProperty('password');
+  });
+
+  // USR-04 — Negativo: id inexistente (404)
+  test('PATCH /api/users/:id returns 404 for non-existent user', async ({ request }) => {
+    const response = await request.patch(`${BASE_URL}/api/users/00000000-0000-0000-0000-000000000000`, {
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      data: { firstName: 'Ghost' },
+    });
+
+    expect(response.status()).toBe(404);
+    const body = await response.json();
+    expect(body.data).toBeNull();
+    expect(body.error).toContain('00000000-0000-0000-0000-000000000000');
+    expect(body.timestamp).toEqual(expect.any(Number));
+  });
+
+  // USR-04 — Negativo: sin token (401)
+  test('PATCH /api/users/:id returns 401 without token', async ({ request }) => {
+    const response = await request.patch(`${BASE_URL}/api/users/00000000-0000-0000-0000-000000000000`, {
+      headers: { 'Content-Type': 'application/json' },
+      data: { firstName: 'NoAuth' },
+    });
+    expect(response.status()).toBe(401);
+  });
+
   // USR-01 — Crear usuario admin
   test('POST /api/users creates a new admin user', async ({ request }) => {
     const uniqueEmail = `usr01.${Date.now()}@example.com`;
