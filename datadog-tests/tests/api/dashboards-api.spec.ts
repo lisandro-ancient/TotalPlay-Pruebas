@@ -51,4 +51,31 @@ test.describe('Auth Me API', () => {
     const response = await request.get(`${BASE_URL}/api/auth/me`);
     expect(response.status()).toBe(401);
   });
+
+  // AUTH-06 — Cambio de contraseña
+  test('PATCH /api/auth/change-password succeeds with correct current password', async ({ request }) => {
+    const response = await request.patch(`${BASE_URL}/api/auth/change-password`, {
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      data: { currentPassword: credentials.password, newPassword: credentials.password },
+    });
+
+    expect(response.status()).toBe(200);
+    const body = await response.json();
+    expect(body.error).toBeNull();
+    expect(body.timestamp).toEqual(expect.any(Number));
+  });
+
+  // AUTH-06 — Negativo: contraseña actual incorrecta
+  test('PATCH /api/auth/change-password returns 401 with wrong current password', async ({ request }) => {
+    const response = await request.patch(`${BASE_URL}/api/auth/change-password`, {
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      data: { currentPassword: 'WrongPassword!', newPassword: credentials.password },
+    });
+
+    expect(response.status()).toBe(401);
+    const body = await response.json();
+    expect(body.data).toBeNull();
+    expect(body.error).toBe('Incorrect current password.');
+    expect(body.timestamp).toEqual(expect.any(Number));
+  });
 });
