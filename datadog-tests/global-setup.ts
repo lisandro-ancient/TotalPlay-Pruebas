@@ -1,6 +1,7 @@
 import { chromium } from '@playwright/test';
-import { BASE_URL } from './utils/config';
 import { credentials } from './fixtures/testData';
+
+const BASE_URL = process.env.DD_BASE_URL || 'https://totalplay-dev.ancient.mx';
 
 export default async function globalSetup() {
   const browser = await chromium.launch();

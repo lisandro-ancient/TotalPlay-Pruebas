@@ -12,6 +12,6 @@ export const testDashboard = {
 };
 
 export const credentials = {
-  username: process.env.DD_USERNAME ?? 'admin@totalplay.com',
-  password: process.env.DD_PASSWORD ?? 'AdminPassword123!',
+  username: process.env.DD_USERNAME || 'admin@totalplay.com',
+  password: process.env.DD_PASSWORD || 'AdminPassword123!',
 };
