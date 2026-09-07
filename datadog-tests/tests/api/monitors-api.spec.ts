@@ -48,6 +48,72 @@ test.describe('Users API', () => {
     expect(response.status()).toBe(401);
   });
 
+  // USR-05 — Desactivar usuario
+  test('PATCH /api/users/:id/status deactivates a user', async ({ request }) => {
+    const createRes = await request.post(`${BASE_URL}/api/users`, {
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      data: { email: `usr05.${Date.now()}@example.com`, password: 'password123', firstName: 'Active', lastName: 'User', role: 'admin' },
+    });
+    const { data: created } = await createRes.json();
+
+    const response = await request.patch(`${BASE_URL}/api/users/${created.id}/status`, {
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      data: { isActive: false },
+    });
+
+    expect(response.status()).toBe(200);
+    const body = await response.json();
+    expect(body.error).toBeNull();
+    expect(body.timestamp).toEqual(expect.any(Number));
+    expect(body.data).toMatchObject({
+      id: created.id,
+      isActive: false,
+    });
+    expect(body.data.updatedAt).not.toBe(created.updatedAt);
+  });
+
+  test('PATCH /api/users/:id/status reactivates a user', async ({ request }) => {
+    const createRes = await request.post(`${BASE_URL}/api/users`, {
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      data: { email: `usr05b.${Date.now()}@example.com`, password: 'password123', firstName: 'Inactive', lastName: 'User', role: 'admin' },
+    });
+    const { data: created } = await createRes.json();
+
+    await request.patch(`${BASE_URL}/api/users/${created.id}/status`, {
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      data: { isActive: false },
+    });
+
+    const response = await request.patch(`${BASE_URL}/api/users/${created.id}/status`, {
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      data: { isActive: true },
+    });
+
+    expect(response.status()).toBe(200);
+    const body = await response.json();
+    expect(body.data.isActive).toBe(true);
+    expect(body.error).toBeNull();
+  });
+
+  test('PATCH /api/users/:id/status returns 404 for non-existent user', async ({ request }) => {
+    const response = await request.patch(`${BASE_URL}/api/users/00000000-0000-0000-0000-000000000000/status`, {
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      data: { isActive: false },
+    });
+    expect(response.status()).toBe(404);
+    const body = await response.json();
+    expect(body.data).toBeNull();
+    expect(body.error).toContain('00000000-0000-0000-0000-000000000000');
+  });
+
+  test('PATCH /api/users/:id/status returns 401 without token', async ({ request }) => {
+    const response = await request.patch(`${BASE_URL}/api/users/00000000-0000-0000-0000-000000000000/status`, {
+      headers: { 'Content-Type': 'application/json' },
+      data: { isActive: false },
+    });
+    expect(response.status()).toBe(401);
+  });
+
   // USR-04 — Actualizar usuario
   test('PATCH /api/users/:id updates user fields', async ({ request }) => {
     const createRes = await request.post(`${BASE_URL}/api/users`, {
