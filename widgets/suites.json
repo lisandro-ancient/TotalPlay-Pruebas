@@ -1,0 +1,1 @@
+{"total":2,"items":[{"uid":"b11b98ed1720b2810dc163ee7d883314","name":"ui","statistic":{"failed":0,"broken":0,"skipped":0,"passed":21,"unknown":0,"total":21}},{"uid":"f1893fd79b91b0b418ee072478426063","name":"websocket","statistic":{"failed":0,"broken":0,"skipped":0,"passed":2,"unknown":0,"total":2}}]}
