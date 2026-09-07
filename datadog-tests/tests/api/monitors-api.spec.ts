@@ -1,28 +1,50 @@
-import { test } from '@playwright/test';
-import { DatadogClient } from '../../api/DatadogClient';
-import { expectOk } from '../../utils/assertions';
-import { testMonitor } from '../../fixtures/testData';
-import { API_BASE_URL } from '../../utils/config';
+import { test, expect } from '@playwright/test';
+import { AuthClient } from '../../api/AuthClient';
+import { credentials } from '../../fixtures/testData';
 
-test.describe('Monitors API', () => {
-  let client: DatadogClient;
+const BASE_URL = process.env.DD_BASE_URL || 'https://totalplay-dev.ancient.mx';
 
-  test.beforeEach(({ request }) => {
-    client = new DatadogClient(request);
+test.describe('Users API', () => {
+  let token: string;
+
+  test.beforeAll(async ({ request }) => {
+    const auth = new AuthClient(request);
+    const response = await auth.login(credentials.username, credentials.password);
+    const body = await response.json();
+    token = body.data.accessToken;
   });
 
-  test.use({ baseURL: API_BASE_URL });
+  test('GET /api/users returns 200 with user list', async ({ request }) => {
+    const response = await request.get(`${BASE_URL}/api/users`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
 
-  test('should list monitors', async () => {
-    const response = await client.getMonitors();
-    await expectOk(response);
+    expect(response.status()).toBe(200);
+    const body = await response.json();
+    expect(body.error).toBeNull();
+    expect(body.data.users).toBeInstanceOf(Array);
+    expect(body.data.total).toBeGreaterThan(0);
   });
 
-  test('should create and delete a monitor', async () => {
-    const create = await client.createMonitor(testMonitor);
-    await expectOk(create);
-    const { id } = await create.json();
-    const del = await client.deleteMonitor(id);
-    await expectOk(del);
+  test('GET /api/users returns user with correct shape', async ({ request }) => {
+    const response = await request.get(`${BASE_URL}/api/users`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    const body = await response.json();
+    const user = body.data.users[0];
+    expect(user).toMatchObject({
+      id: expect.any(String),
+      email: expect.any(String),
+      firstName: expect.any(String),
+      lastName: expect.any(String),
+      role: expect.any(String),
+      isActive: expect.any(Boolean),
+    });
+  });
+
+  test('GET /api/users returns 401 without token', async ({ request }) => {
+    const response = await request.get(`${BASE_URL}/api/users`);
+    expect(response.status()).toBe(401);
   });
 });

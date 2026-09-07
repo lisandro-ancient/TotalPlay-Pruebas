@@ -1,28 +1,51 @@
-import { test } from '@playwright/test';
-import { DatadogClient } from '../../api/DatadogClient';
-import { expectOk } from '../../utils/assertions';
-import { testDashboard } from '../../fixtures/testData';
-import { API_BASE_URL } from '../../utils/config';
+import { test, expect } from '@playwright/test';
+import { AuthClient } from '../../api/AuthClient';
+import { credentials } from '../../fixtures/testData';
 
-test.describe('Dashboards API', () => {
-  let client: DatadogClient;
+const BASE_URL = process.env.DD_BASE_URL || 'https://totalplay-dev.ancient.mx';
 
-  test.beforeEach(({ request }) => {
-    client = new DatadogClient(request);
+test.describe('Auth Me API', () => {
+  let token: string;
+
+  test.beforeAll(async ({ request }) => {
+    const auth = new AuthClient(request);
+    const response = await auth.login(credentials.username, credentials.password);
+    const body = await response.json();
+    token = body.data.accessToken;
   });
 
-  test.use({ baseURL: API_BASE_URL });
+  test('GET /api/auth/me returns 200 with authenticated user', async ({ request }) => {
+    const response = await request.get(`${BASE_URL}/api/auth/me`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
 
-  test('should list dashboards', async () => {
-    const response = await client.getDashboards();
-    await expectOk(response);
+    expect(response.status()).toBe(200);
+    const body = await response.json();
+    expect(body.error).toBeNull();
+    expect(body.data).toMatchObject({
+      id: expect.any(String),
+      email: credentials.username,
+      firstName: expect.any(String),
+      lastName: expect.any(String),
+      role: 'admin',
+      isActive: true,
+      passwordChangeRequired: false,
+    });
   });
 
-  test('should create and delete a dashboard', async () => {
-    const create = await client.createDashboard(testDashboard);
-    await expectOk(create);
-    const { id } = await create.json();
-    const del = await client.deleteDashboard(id);
-    await expectOk(del);
+  test('GET /api/auth/me returns correct timestamps', async ({ request }) => {
+    const response = await request.get(`${BASE_URL}/api/auth/me`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    const body = await response.json();
+    expect(body.timestamp).toEqual(expect.any(Number));
+    expect(new Date(body.data.createdAt).getTime()).toBeLessThan(Date.now());
+    expect(new Date(body.data.updatedAt).getTime()).toBeLessThan(Date.now());
+  });
+
+  test('GET /api/auth/me returns 401 without token', async ({ request }) => {
+    const response = await request.get(`${BASE_URL}/api/auth/me`);
+    expect(response.status()).toBe(401);
   });
 });
