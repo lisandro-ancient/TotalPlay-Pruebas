@@ -71,17 +71,18 @@ test.describe('Users API', () => {
     expect(body.data).not.toHaveProperty('password');
   });
 
-  // USR-01 — Negativo: email duplicado
-  test('POST /api/users returns error for duplicate email', async ({ request }) => {
+  // USR-02 — Email duplicado
+  test('POST /api/users returns 409 for duplicate email', async ({ request }) => {
     const response = await request.post(`${BASE_URL}/api/users`, {
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
       data: { email: credentials.username, password: 'password123', firstName: 'Nuevo', lastName: 'Usuario', role: 'admin' },
     });
 
-    expect(response.status()).not.toBe(201);
+    expect(response.status()).toBe(409);
     const body = await response.json();
     expect(body.data).toBeNull();
     expect(body.error).toContain(credentials.username);
+    expect(body.timestamp).toEqual(expect.any(Number));
   });
 
   // USR-01 — Negativo: sin token (401)
