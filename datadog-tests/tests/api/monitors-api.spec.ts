@@ -48,6 +48,43 @@ test.describe('Users API', () => {
     expect(response.status()).toBe(401);
   });
 
+  // USR-06 — Resetear contraseña (solo admin)
+  test('PATCH /api/users/:id/reset-password resets password as admin', async ({ request }) => {
+    const createRes = await request.post(`${BASE_URL}/api/users`, {
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      data: { email: `usr06.${Date.now()}@example.com`, password: 'password123', firstName: 'Reset', lastName: 'User', role: 'admin' },
+    });
+    const { data: created } = await createRes.json();
+
+    const response = await request.patch(`${BASE_URL}/api/users/${created.id}/reset-password`, {
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    });
+
+    expect(response.status()).toBe(200);
+    const body = await response.json();
+    expect(body.error).toBeNull();
+    expect(body.timestamp).toEqual(expect.any(Number));
+  });
+
+  test('PATCH /api/users/:id/reset-password returns 404 for non-existent user', async ({ request }) => {
+    const response = await request.patch(`${BASE_URL}/api/users/00000000-0000-0000-0000-000000000000/reset-password`, {
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    });
+
+    expect(response.status()).toBe(404);
+    const body = await response.json();
+    expect(body.data).toBeNull();
+    expect(body.error).toContain('00000000-0000-0000-0000-000000000000');
+    expect(body.timestamp).toEqual(expect.any(Number));
+  });
+
+  test('PATCH /api/users/:id/reset-password returns 401 without token', async ({ request }) => {
+    const response = await request.patch(`${BASE_URL}/api/users/00000000-0000-0000-0000-000000000000/reset-password`, {
+      headers: { 'Content-Type': 'application/json' },
+    });
+    expect(response.status()).toBe(401);
+  });
+
   // USR-05 — Desactivar usuario
   test('PATCH /api/users/:id/status deactivates a user', async ({ request }) => {
     const createRes = await request.post(`${BASE_URL}/api/users`, {
