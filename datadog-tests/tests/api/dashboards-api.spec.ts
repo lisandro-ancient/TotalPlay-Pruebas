@@ -21,15 +21,18 @@ test.describe('Auth Me API', () => {
 
     expect(response.status()).toBe(200);
     const body = await response.json();
+
+    // AUTH-05 — Obtener perfil (Me)
     expect(body.error).toBeNull();
+    expect(body.timestamp).toEqual(expect.any(Number));
     expect(body.data).toMatchObject({
-      id: expect.any(String),
+      id: expect.stringMatching(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/),
       email: credentials.username,
       firstName: expect.any(String),
       lastName: expect.any(String),
       role: 'admin',
-      isActive: true,
-      passwordChangeRequired: false,
+      createdAt: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/),
+      updatedAt: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/),
     });
   });
 
