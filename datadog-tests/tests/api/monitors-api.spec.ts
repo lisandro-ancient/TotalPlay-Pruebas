@@ -47,4 +47,62 @@ test.describe('Users API', () => {
     const response = await request.get(`${BASE_URL}/api/users`);
     expect(response.status()).toBe(401);
   });
+
+  // USR-01 — Crear usuario admin
+  test('POST /api/users creates a new admin user', async ({ request }) => {
+    const uniqueEmail = `usr01.${Date.now()}@example.com`;
+    const response = await request.post(`${BASE_URL}/api/users`, {
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      data: { email: uniqueEmail, password: 'password123', firstName: 'Nuevo', lastName: 'Usuario', role: 'admin' },
+    });
+
+    expect(response.status()).toBe(201);
+    const body = await response.json();
+    expect(body.error).toBeNull();
+    expect(body.timestamp).toEqual(expect.any(Number));
+    expect(body.data).toMatchObject({
+      id: expect.stringMatching(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/),
+      email: uniqueEmail,
+      firstName: 'Nuevo',
+      lastName: 'Usuario',
+      role: 'admin',
+      isActive: true,
+    });
+    expect(body.data).not.toHaveProperty('password');
+  });
+
+  // USR-01 — Negativo: email duplicado
+  test('POST /api/users returns error for duplicate email', async ({ request }) => {
+    const response = await request.post(`${BASE_URL}/api/users`, {
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      data: { email: credentials.username, password: 'password123', firstName: 'Nuevo', lastName: 'Usuario', role: 'admin' },
+    });
+
+    expect(response.status()).not.toBe(201);
+    const body = await response.json();
+    expect(body.data).toBeNull();
+    expect(body.error).toContain(credentials.username);
+  });
+
+  // USR-01 — Negativo: sin token (401)
+  test('POST /api/users returns 401 without token', async ({ request }) => {
+    const response = await request.post(`${BASE_URL}/api/users`, {
+      headers: { 'Content-Type': 'application/json' },
+      data: { email: 'noauth@example.com', password: 'password123', firstName: 'No', lastName: 'Auth', role: 'admin' },
+    });
+    expect(response.status()).toBe(401);
+  });
+
+  // USR-01 — Negativo: body inválido (400)
+  test('POST /api/users returns 400 with invalid body', async ({ request }) => {
+    const response = await request.post(`${BASE_URL}/api/users`, {
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      data: { email: '', password: '', firstName: '', lastName: '', role: '' },
+    });
+
+    expect(response.status()).toBe(400);
+    const body = await response.json();
+    expect(body.data).toBeNull();
+    expect(body.error).toBe('Bad Request Exception');
+  });
 });
