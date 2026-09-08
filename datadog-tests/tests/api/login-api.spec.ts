@@ -2,8 +2,8 @@ import { test, expect } from '@playwright/test';
 import { AuthClient } from '../../api/AuthClient';
 import { credentials } from '../../fixtures/testData';
 
-test.describe('Auth API - Login', () => {
-  test('POST /api/auth/login returns 200 with valid credentials', async ({ request }) => {
+test.describe('API de Autenticación - Inicio de sesión', () => {
+  test('Iniciar sesión: credenciales válidas devuelve 201 y tokens', async ({ request }) => {
     const client = new AuthClient(request);
     const response = await client.login(credentials.username, credentials.password);
 
@@ -21,7 +21,7 @@ test.describe('Auth API - Login', () => {
     expect(body.data.refreshToken.length).toBeGreaterThan(0);
   });
 
-  test('POST /api/auth/login returns JWT with correct claims', async ({ request }) => {
+  test('Iniciar sesión: el JWT contiene las reclamaciones esperadas', async ({ request }) => {
     const client = new AuthClient(request);
     const response = await client.login(credentials.username, credentials.password);
 
@@ -34,7 +34,7 @@ test.describe('Auth API - Login', () => {
     expect(payload.exp).toBeGreaterThan(payload.iat);
   });
 
-  test('POST /api/auth/login returns error with invalid credentials', async ({ request }) => {
+  test('Iniciar sesión: credenciales inválidas devuelve 500 y mensaje de error', async ({ request }) => {
     const client = new AuthClient(request);
     const response = await client.login('wrong@totalplay.com', 'wrongpassword');
 
@@ -46,7 +46,7 @@ test.describe('Auth API - Login', () => {
     expect(body.timestamp).toEqual(expect.any(Number));
   });
 
-  test('POST /api/auth/login returns error with empty credentials', async ({ request }) => {
+  test('Iniciar sesión: credenciales vacías devuelve 400 (Bad Request)', async ({ request }) => {
     const client = new AuthClient(request);
     const response = await client.login('', '');
 

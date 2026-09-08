@@ -14,7 +14,7 @@ test.describe('Users API', () => {
     token = body.data.accessToken;
   });
 
-  test('GET /api/users returns 200 with user list', async ({ request }) => {
+  test('Listar usuarios: responde 200 y devuelve lista de usuarios no vacía', async ({ request }) => {
     const response = await request.get(`${BASE_URL}/api/users`, {
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -26,7 +26,7 @@ test.describe('Users API', () => {
     expect(body.data.total).toBeGreaterThan(0);
   });
 
-  test('GET /api/users returns user with correct shape', async ({ request }) => {
+  test('Listar usuarios: cada usuario tiene los campos esperados', async ({ request }) => {
     const response = await request.get(`${BASE_URL}/api/users`, {
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -43,13 +43,13 @@ test.describe('Users API', () => {
     });
   });
 
-  test('GET /api/users returns 401 without token', async ({ request }) => {
+  test('Listar usuarios: no autorizado sin token (401)', async ({ request }) => {
     const response = await request.get(`${BASE_URL}/api/users`);
     expect(response.status()).toBe(401);
   });
 
   // USR-06 — Resetear contraseña (solo admin)
-  test('PATCH /api/users/:id/reset-password resets password as admin', async ({ request }) => {
+  test('Restablecer contraseña (admin): éxito (200)', async ({ request }) => {
     const createRes = await request.post(`${BASE_URL}/api/users`, {
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
       data: { email: `usr06.${Date.now()}@example.com`, password: 'password123', firstName: 'Reset', lastName: 'User', role: 'admin' },
@@ -66,7 +66,7 @@ test.describe('Users API', () => {
     expect(body.timestamp).toEqual(expect.any(Number));
   });
 
-  test('PATCH /api/users/:id/reset-password returns 404 for non-existent user', async ({ request }) => {
+  test('Restablecer contraseña: 404 para usuario inexistente', async ({ request }) => {
     const response = await request.patch(`${BASE_URL}/api/users/00000000-0000-0000-0000-000000000000/reset-password`, {
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
     });
@@ -78,7 +78,7 @@ test.describe('Users API', () => {
     expect(body.timestamp).toEqual(expect.any(Number));
   });
 
-  test('PATCH /api/users/:id/reset-password returns 401 without token', async ({ request }) => {
+  test('Restablecer contraseña: 401 sin autenticación', async ({ request }) => {
     const response = await request.patch(`${BASE_URL}/api/users/00000000-0000-0000-0000-000000000000/reset-password`, {
       headers: { 'Content-Type': 'application/json' },
     });
@@ -86,7 +86,7 @@ test.describe('Users API', () => {
   });
 
   // USR-05 — Desactivar usuario
-  test('PATCH /api/users/:id/status deactivates a user', async ({ request }) => {
+  test('Desactivar usuario: establece isActive a false (200)', async ({ request }) => {
     const createRes = await request.post(`${BASE_URL}/api/users`, {
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
       data: { email: `usr05.${Date.now()}@example.com`, password: 'password123', firstName: 'Active', lastName: 'User', role: 'admin' },
@@ -109,7 +109,7 @@ test.describe('Users API', () => {
     expect(body.data.updatedAt).not.toBe(created.updatedAt);
   });
 
-  test('PATCH /api/users/:id/status reactivates a user', async ({ request }) => {
+  test('Reactivar usuario: establece isActive a true (200)', async ({ request }) => {
     const createRes = await request.post(`${BASE_URL}/api/users`, {
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
       data: { email: `usr05b.${Date.now()}@example.com`, password: 'password123', firstName: 'Inactive', lastName: 'User', role: 'admin' },
@@ -132,7 +132,7 @@ test.describe('Users API', () => {
     expect(body.error).toBeNull();
   });
 
-  test('PATCH /api/users/:id/status returns 404 for non-existent user', async ({ request }) => {
+  test('Cambiar estado de usuario: 404 para usuario inexistente', async ({ request }) => {
     const response = await request.patch(`${BASE_URL}/api/users/00000000-0000-0000-0000-000000000000/status`, {
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
       data: { isActive: false },
@@ -143,7 +143,7 @@ test.describe('Users API', () => {
     expect(body.error).toContain('00000000-0000-0000-0000-000000000000');
   });
 
-  test('PATCH /api/users/:id/status returns 401 without token', async ({ request }) => {
+  test('Cambiar estado de usuario: 401 sin autenticación', async ({ request }) => {
     const response = await request.patch(`${BASE_URL}/api/users/00000000-0000-0000-0000-000000000000/status`, {
       headers: { 'Content-Type': 'application/json' },
       data: { isActive: false },
@@ -152,7 +152,7 @@ test.describe('Users API', () => {
   });
 
   // USR-04 — Actualizar usuario
-  test('PATCH /api/users/:id updates user fields', async ({ request }) => {
+  test('Actualizar usuario: modifica campos y oculta contraseña (200)', async ({ request }) => {
     const createRes = await request.post(`${BASE_URL}/api/users`, {
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
       data: { email: `usr04.${Date.now()}@example.com`, password: 'password123', firstName: 'Original', lastName: 'User', role: 'admin' },
@@ -179,7 +179,7 @@ test.describe('Users API', () => {
   });
 
   // USR-04 — Negativo: id inexistente (404)
-  test('PATCH /api/users/:id returns 404 for non-existent user', async ({ request }) => {
+  test('Actualizar usuario: 404 para usuario inexistente', async ({ request }) => {
     const response = await request.patch(`${BASE_URL}/api/users/00000000-0000-0000-0000-000000000000`, {
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
       data: { firstName: 'Ghost' },
@@ -193,7 +193,7 @@ test.describe('Users API', () => {
   });
 
   // USR-04 — Negativo: sin token (401)
-  test('PATCH /api/users/:id returns 401 without token', async ({ request }) => {
+  test('Actualizar usuario: 401 sin autenticación', async ({ request }) => {
     const response = await request.patch(`${BASE_URL}/api/users/00000000-0000-0000-0000-000000000000`, {
       headers: { 'Content-Type': 'application/json' },
       data: { firstName: 'NoAuth' },
@@ -202,7 +202,7 @@ test.describe('Users API', () => {
   });
 
   // USR-01 — Crear usuario admin
-  test('POST /api/users creates a new admin user', async ({ request }) => {
+  test('Crear usuario admin: devuelve 201 y objeto usuario', async ({ request }) => {
     const uniqueEmail = `usr01.${Date.now()}@example.com`;
     const response = await request.post(`${BASE_URL}/api/users`, {
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
@@ -225,7 +225,7 @@ test.describe('Users API', () => {
   });
 
   // USR-03 — Listar usuarios (paginado)
-  test('GET /api/users supports pagination with page and limit', async ({ request }) => {
+  test('Listar usuarios (paginación): respeta page y limit', async ({ request }) => {
     const response = await request.get(`${BASE_URL}/api/users?page=1&limit=2`, {
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -239,7 +239,7 @@ test.describe('Users API', () => {
     expect(body.data.total).toBeGreaterThan(0);
   });
 
-  test('GET /api/users supports search query param', async ({ request }) => {
+  test('Listar usuarios (búsqueda): encuentra usuario que coincide con la consulta', async ({ request }) => {
     const response = await request.get(`${BASE_URL}/api/users?page=1&limit=10&search=Admin`, {
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -256,7 +256,7 @@ test.describe('Users API', () => {
     });
   });
 
-  test('GET /api/users returns empty list for non-matching search', async ({ request }) => {
+  test('Listar usuarios (búsqueda): devuelve vacío cuando no hay coincidencias', async ({ request }) => {
     const response = await request.get(`${BASE_URL}/api/users?page=1&limit=10&search=NonExistentUser999`, {
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -269,7 +269,7 @@ test.describe('Users API', () => {
   });
 
   // USR-02 — Email duplicado
-  test('POST /api/users returns 409 for duplicate email', async ({ request }) => {
+  test('Crear usuario: 409 si el correo ya existe', async ({ request }) => {
     const response = await request.post(`${BASE_URL}/api/users`, {
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
       data: { email: credentials.username, password: 'password123', firstName: 'Nuevo', lastName: 'Usuario', role: 'admin' },
@@ -283,7 +283,7 @@ test.describe('Users API', () => {
   });
 
   // USR-01 — Negativo: sin token (401)
-  test('POST /api/users returns 401 without token', async ({ request }) => {
+  test('Crear usuario: 401 sin autenticación', async ({ request }) => {
     const response = await request.post(`${BASE_URL}/api/users`, {
       headers: { 'Content-Type': 'application/json' },
       data: { email: 'noauth@example.com', password: 'password123', firstName: 'No', lastName: 'Auth', role: 'admin' },
@@ -292,7 +292,7 @@ test.describe('Users API', () => {
   });
 
   // USR-01 — Negativo: body inválido (400)
-  test('POST /api/users returns 400 with invalid body', async ({ request }) => {
+  test('Crear usuario: 400 por body inválido', async ({ request }) => {
     const response = await request.post(`${BASE_URL}/api/users`, {
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
       data: { email: '', password: '', firstName: '', lastName: '', role: '' },

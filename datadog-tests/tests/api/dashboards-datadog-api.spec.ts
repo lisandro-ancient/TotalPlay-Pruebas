@@ -4,7 +4,7 @@ import { credentials } from '../../fixtures/testData';
 
 const BASE_URL = process.env.DD_BASE_URL || 'https://totalplay-dev.ancient.mx';
 
-test.describe('Dashboards API', () => {
+test.describe('API de Dashboards', () => {
   let token: string;
 
   test.beforeAll(async ({ request }) => {
@@ -15,7 +15,7 @@ test.describe('Dashboards API', () => {
   });
 
   // DB-01 — Dashboard "app-clientes"
-  test('GET /api/dashboards/app-clientes returns 200 with metrics', async ({ request }) => {
+  test('Dashboard app-clientes: responde 200 y devuelve métricas válidas', async ({ request }) => {
     const response = await request.get(`${BASE_URL}/api/dashboards/app-clientes?timeRange=4h`, {
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -33,7 +33,7 @@ test.describe('Dashboards API', () => {
   });
 
   // DB-01 — Validar shape de métricas
-  test('GET /api/dashboards/app-clientes metrics have correct shape', async ({ request }) => {
+  test('Dashboard app-clientes: métricas con estructura correcta', async ({ request }) => {
     const response = await request.get(`${BASE_URL}/api/dashboards/app-clientes?timeRange=4h`, {
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -49,7 +49,7 @@ test.describe('Dashboards API', () => {
   });
 
   // DB-01 — Resiliencia: delta/trend pueden ser null sin romper el 200
-  test('GET /api/dashboards/app-clientes tolerates null delta and deltaPercent fields', async ({ request }) => {
+  test('Dashboard app-clientes: tolera campos delta nulos sin romper la respuesta', async ({ request }) => {
     const response = await request.get(`${BASE_URL}/api/dashboards/app-clientes?timeRange=4h`, {
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -68,13 +68,13 @@ test.describe('Dashboards API', () => {
   });
 
   // DB-01 — Negativo: sin token (401)
-  test('GET /api/dashboards/app-clientes returns 401 without token', async ({ request }) => {
+  test('Dashboard app-clientes: 401 sin token', async ({ request }) => {
     const response = await request.get(`${BASE_URL}/api/dashboards/app-clientes?timeRange=4h`);
     expect(response.status()).toBe(401);
   });
 
   // DB-01 — Negativo: dashboard inexistente (400)
-  test('GET /api/dashboards/:id returns 400 for non-existent dashboard', async ({ request }) => {
+  test('Dashboard: 400 para dashboard inexistente', async ({ request }) => {
     const response = await request.get(`${BASE_URL}/api/dashboards/non-existent?timeRange=4h`, {
       headers: { Authorization: `Bearer ${token}` },
     });

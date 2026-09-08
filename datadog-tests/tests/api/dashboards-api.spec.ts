@@ -4,7 +4,7 @@ import { credentials } from '../../fixtures/testData';
 
 const BASE_URL = process.env.DD_BASE_URL || 'https://totalplay-dev.ancient.mx';
 
-test.describe('Auth Me API', () => {
+test.describe('API de Autenticación - Perfil', () => {
   let token: string;
 
   test.beforeAll(async ({ request }) => {
@@ -14,7 +14,7 @@ test.describe('Auth Me API', () => {
     token = body.data.accessToken;
   });
 
-  test('GET /api/auth/me returns 200 with authenticated user', async ({ request }) => {
+  test('Obtener perfil: responde 200 y devuelve usuario autenticado', async ({ request }) => {
     const response = await request.get(`${BASE_URL}/api/auth/me`, {
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -36,7 +36,7 @@ test.describe('Auth Me API', () => {
     });
   });
 
-  test('GET /api/auth/me returns correct timestamps', async ({ request }) => {
+  test('Obtener perfil: timestamps válidos', async ({ request }) => {
     const response = await request.get(`${BASE_URL}/api/auth/me`, {
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -47,13 +47,13 @@ test.describe('Auth Me API', () => {
     expect(new Date(body.data.updatedAt).getTime()).toBeLessThan(Date.now());
   });
 
-  test('GET /api/auth/me returns 401 without token', async ({ request }) => {
+  test('Obtener perfil: 401 sin token', async ({ request }) => {
     const response = await request.get(`${BASE_URL}/api/auth/me`);
     expect(response.status()).toBe(401);
   });
 
   // AUTH-06 — Cambio de contraseña
-  test('PATCH /api/auth/change-password succeeds with correct current password', async ({ request }) => {
+  test('Cambiar contraseña: éxito con contraseña actual correcta (200)', async ({ request }) => {
     const response = await request.patch(`${BASE_URL}/api/auth/change-password`, {
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
       data: { currentPassword: credentials.password, newPassword: credentials.password },
@@ -66,7 +66,7 @@ test.describe('Auth Me API', () => {
   });
 
   // AUTH-06 — Negativo: contraseña actual incorrecta
-  test('PATCH /api/auth/change-password returns 401 with wrong current password', async ({ request }) => {
+  test('Cambiar contraseña: 401 con contraseña actual incorrecta', async ({ request }) => {
     const response = await request.patch(`${BASE_URL}/api/auth/change-password`, {
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
       data: { currentPassword: 'WrongPassword!', newPassword: credentials.password },
