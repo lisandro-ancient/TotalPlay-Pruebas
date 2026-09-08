@@ -1,0 +1,8 @@
+# Ignore generated Allure package and local artifacts
+/allure-report-with-logs.zip
+/.DS_Store
+/file.png
+/test-matrix.csv
+
+# macOS
+.DS_Store
