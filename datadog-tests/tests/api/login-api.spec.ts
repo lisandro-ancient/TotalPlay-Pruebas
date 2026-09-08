@@ -6,10 +6,12 @@ test.describe('API de Autenticación - Inicio de sesión', () => {
   test('Iniciar sesión: credenciales válidas devuelve 201 y tokens', async ({ request }) => {
     const client = new AuthClient(request);
     const response = await client.login(credentials.username, credentials.password);
+    const respText = await response.text();
+    await test.info().attach('response-body', { body: respText, contentType: 'application/json' });
 
     expect(response.status()).toBe(201);
 
-    const body = await response.json();
+    const body = JSON.parse(respText);
     expect(body.error).toBeNull();
     expect(body.timestamp).toEqual(expect.any(Number));
     expect(body.data).toMatchObject({
@@ -24,8 +26,9 @@ test.describe('API de Autenticación - Inicio de sesión', () => {
   test('Iniciar sesión: el JWT contiene las reclamaciones esperadas', async ({ request }) => {
     const client = new AuthClient(request);
     const response = await client.login(credentials.username, credentials.password);
-
-    const body = await response.json();
+    const respText2 = await response.text();
+    await test.info().attach('response-body', { body: respText2, contentType: 'application/json' });
+    const body = JSON.parse(respText2);
     const payload = JSON.parse(Buffer.from(body.data.accessToken.split('.')[1], 'base64').toString());
 
     expect(payload.email).toBe(credentials.username);
@@ -37,10 +40,12 @@ test.describe('API de Autenticación - Inicio de sesión', () => {
   test('Iniciar sesión: credenciales inválidas devuelve 500 y mensaje de error', async ({ request }) => {
     const client = new AuthClient(request);
     const response = await client.login('wrong@totalplay.com', 'wrongpassword');
+    const respText3 = await response.text();
+    await test.info().attach('response-body', { body: respText3, contentType: 'application/json' });
 
     expect(response.status()).toBe(500);
 
-    const body = await response.json();
+    const body = JSON.parse(respText3);
     expect(body.data).toBeNull();
     expect(body.error).toBe('Internal server error');
     expect(body.timestamp).toEqual(expect.any(Number));
@@ -49,10 +54,12 @@ test.describe('API de Autenticación - Inicio de sesión', () => {
   test('Iniciar sesión: credenciales vacías devuelve 400 (Bad Request)', async ({ request }) => {
     const client = new AuthClient(request);
     const response = await client.login('', '');
+    const respText4 = await response.text();
+    await test.info().attach('response-body', { body: respText4, contentType: 'application/json' });
 
     expect(response.status()).toBe(400);
 
-    const body = await response.json();
+    const body = JSON.parse(respText4);
     expect(body.data).toBeNull();
     expect(body.error).toBe('Bad Request Exception');
     expect(body.timestamp).toEqual(expect.any(Number));

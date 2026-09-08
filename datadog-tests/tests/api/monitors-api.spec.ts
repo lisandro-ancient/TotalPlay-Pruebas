@@ -10,7 +10,9 @@ test.describe('Users API', () => {
   test.beforeAll(async ({ request }) => {
     const auth = new AuthClient(request);
     const response = await auth.login(credentials.username, credentials.password);
-    const body = await response.json();
+    const respText = await response.text();
+    await test.info().attach('response-body', { body: respText, contentType: 'application/json' });
+    const body = JSON.parse(respText);
     token = body.data.accessToken;
   });
 
@@ -18,9 +20,11 @@ test.describe('Users API', () => {
     const response = await request.get(`${BASE_URL}/api/users`, {
       headers: { Authorization: `Bearer ${token}` },
     });
+    const respText = await response.text();
+    await test.info().attach('response-body', { body: respText, contentType: 'application/json' });
 
     expect(response.status()).toBe(200);
-    const body = await response.json();
+    const body = JSON.parse(respText);
     expect(body.error).toBeNull();
     expect(body.data.users).toBeInstanceOf(Array);
     expect(body.data.total).toBeGreaterThan(0);
@@ -30,8 +34,9 @@ test.describe('Users API', () => {
     const response = await request.get(`${BASE_URL}/api/users`, {
       headers: { Authorization: `Bearer ${token}` },
     });
-
-    const body = await response.json();
+    const respText2 = await response.text();
+    await test.info().attach('response-body', { body: respText2, contentType: 'application/json' });
+    const body = JSON.parse(respText2);
     const user = body.data.users[0];
     expect(user).toMatchObject({
       id: expect.any(String),
@@ -54,7 +59,9 @@ test.describe('Users API', () => {
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
       data: { email: `usr06.${Date.now()}@example.com`, password: 'password123', firstName: 'Reset', lastName: 'User', role: 'admin' },
     });
-    const { data: created } = await createRes.json();
+    const createResText = await createRes.text();
+    await test.info().attach('response-body', { body: createResText, contentType: 'application/json' });
+    const { data: created } = JSON.parse(createResText);
 
     const response = await request.patch(`${BASE_URL}/api/users/${created.id}/reset-password`, {
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },

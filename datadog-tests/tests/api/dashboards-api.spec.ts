@@ -18,9 +18,11 @@ test.describe('API de Autenticación - Perfil', () => {
     const response = await request.get(`${BASE_URL}/api/auth/me`, {
       headers: { Authorization: `Bearer ${token}` },
     });
+    const respText = await response.text();
+    await test.info().attach('response-body', { body: respText, contentType: 'application/json' });
 
     expect(response.status()).toBe(200);
-    const body = await response.json();
+    const body = JSON.parse(respText);
 
     // AUTH-05 — Obtener perfil (Me)
     expect(body.error).toBeNull();
@@ -40,8 +42,9 @@ test.describe('API de Autenticación - Perfil', () => {
     const response = await request.get(`${BASE_URL}/api/auth/me`, {
       headers: { Authorization: `Bearer ${token}` },
     });
-
-    const body = await response.json();
+    const respText = await response.text();
+    await test.info().attach('response-body', { body: respText, contentType: 'application/json' });
+    const body = JSON.parse(respText);
     expect(body.timestamp).toEqual(expect.any(Number));
     expect(new Date(body.data.createdAt).getTime()).toBeLessThan(Date.now());
     expect(new Date(body.data.updatedAt).getTime()).toBeLessThan(Date.now());
@@ -49,6 +52,8 @@ test.describe('API de Autenticación - Perfil', () => {
 
   test('Obtener perfil: 401 sin token', async ({ request }) => {
     const response = await request.get(`${BASE_URL}/api/auth/me`);
+    const respText = await response.text();
+    await test.info().attach('response-body', { body: respText, contentType: 'application/json' });
     expect(response.status()).toBe(401);
   });
 
@@ -58,9 +63,11 @@ test.describe('API de Autenticación - Perfil', () => {
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
       data: { currentPassword: credentials.password, newPassword: credentials.password },
     });
+    const respText = await response.text();
+    await test.info().attach('response-body', { body: respText, contentType: 'application/json' });
 
     expect(response.status()).toBe(200);
-    const body = await response.json();
+    const body = JSON.parse(respText);
     expect(body.error).toBeNull();
     expect(body.timestamp).toEqual(expect.any(Number));
   });
@@ -71,9 +78,11 @@ test.describe('API de Autenticación - Perfil', () => {
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
       data: { currentPassword: 'WrongPassword!', newPassword: credentials.password },
     });
+    const respText = await response.text();
+    await test.info().attach('response-body', { body: respText, contentType: 'application/json' });
 
     expect(response.status()).toBe(401);
-    const body = await response.json();
+    const body = JSON.parse(respText);
     expect(body.data).toBeNull();
     expect(body.error).toBe('Incorrect current password.');
     expect(body.timestamp).toEqual(expect.any(Number));

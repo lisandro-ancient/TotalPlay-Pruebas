@@ -19,9 +19,11 @@ test.describe('API de Dashboards', () => {
     const response = await request.get(`${BASE_URL}/api/dashboards/app-clientes?timeRange=4h`, {
       headers: { Authorization: `Bearer ${token}` },
     });
+    const respText = await response.text();
+    await test.info().attach('response-body', { body: respText, contentType: 'application/json' });
 
     expect(response.status()).toBe(200);
-    const body = await response.json();
+    const body = JSON.parse(respText);
     expect(body.error).toBeNull();
     expect(body.timestamp).toEqual(expect.any(Number));
     expect(body.data.source).toBe('datadog');
@@ -37,8 +39,9 @@ test.describe('API de Dashboards', () => {
     const response = await request.get(`${BASE_URL}/api/dashboards/app-clientes?timeRange=4h`, {
       headers: { Authorization: `Bearer ${token}` },
     });
-
-    const { data } = await response.json();
+    const respText2 = await response.text();
+    await test.info().attach('response-body', { body: respText2, contentType: 'application/json' });
+    const { data } = JSON.parse(respText2);
     const { metrics } = data;
 
     for (const key of ['availability', 'transactions2xx', 'errors4xx', 'errors5xx', 'responseSeconds']) {
@@ -53,9 +56,11 @@ test.describe('API de Dashboards', () => {
     const response = await request.get(`${BASE_URL}/api/dashboards/app-clientes?timeRange=4h`, {
       headers: { Authorization: `Bearer ${token}` },
     });
+    const respText3 = await response.text();
+    await test.info().attach('response-body', { body: respText3, contentType: 'application/json' });
 
     expect(response.status()).toBe(200);
-    const { data } = await response.json();
+    const { data } = JSON.parse(respText3);
     const { metrics } = data;
 
     for (const key of Object.keys(metrics)) {
@@ -70,6 +75,8 @@ test.describe('API de Dashboards', () => {
   // DB-01 — Negativo: sin token (401)
   test('Dashboard app-clientes: 401 sin token', async ({ request }) => {
     const response = await request.get(`${BASE_URL}/api/dashboards/app-clientes?timeRange=4h`);
+    const respText4 = await response.text();
+    await test.info().attach('response-body', { body: respText4, contentType: 'application/json' });
     expect(response.status()).toBe(401);
   });
 
@@ -78,9 +85,11 @@ test.describe('API de Dashboards', () => {
     const response = await request.get(`${BASE_URL}/api/dashboards/non-existent?timeRange=4h`, {
       headers: { Authorization: `Bearer ${token}` },
     });
+    const respText5 = await response.text();
+    await test.info().attach('response-body', { body: respText5, contentType: 'application/json' });
 
     expect(response.status()).toBe(400);
-    const body = await response.json();
+    const body = JSON.parse(respText5);
     expect(body.data).toBeNull();
     expect(body.error).toContain('no encontrado');
     expect(body.timestamp).toEqual(expect.any(Number));

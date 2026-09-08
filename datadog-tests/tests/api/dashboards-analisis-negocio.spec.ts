@@ -18,9 +18,11 @@ test.describe('API de Dashboards - analisis-negocio (DB-05)', () => {
     const response = await request.get(`${BASE_URL}/api/dashboards/analisis-negocio`, {
       headers: { Authorization: `Bearer ${token}` },
     });
+    const respText = await response.text();
+    await test.info().attach('response-body', { body: respText, contentType: 'application/json' });
 
     expect(response.status()).toBe(200);
-    const body = await response.json();
+    const body = JSON.parse(respText);
     expect(body.error).toBeNull();
     expect(body.data).toBeDefined();
 
@@ -54,6 +56,8 @@ test.describe('API de Dashboards - analisis-negocio (DB-05)', () => {
 
   test('Dashboard analisis-negocio: 401 sin token', async ({ request }) => {
     const response = await request.get(`${BASE_URL}/api/dashboards/analisis-negocio`);
+    const respText = await response.text();
+    await test.info().attach('response-body', { body: respText, contentType: 'application/json' });
     expect(response.status()).toBe(401);
   });
 });

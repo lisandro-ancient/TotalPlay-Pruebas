@@ -18,9 +18,11 @@ test.describe('API de Dashboards - DB-08 timeseries login_availability_trend', (
     const response = await request.get(`${BASE_URL}/api/dashboards/timeseries/login_availability_trend?timeWindow=1d`, {
       headers: { Authorization: `Bearer ${token}` },
     });
+    const respText = await response.text();
+    await test.info().attach('response-body', { body: respText, contentType: 'application/json' });
 
     expect(response.status()).toBe(200);
-    const body = await response.json();
+    const body = JSON.parse(respText);
     expect(body.error).toBeNull();
 
     // Aceptar varias formas de respuesta: arreglo directo o en body.data u otros campos comunes
@@ -44,6 +46,8 @@ test.describe('API de Dashboards - DB-08 timeseries login_availability_trend', (
 
   test('login_availability_trend: 401 sin token', async ({ request }) => {
     const response = await request.get(`${BASE_URL}/api/dashboards/timeseries/login_availability_trend?timeWindow=1d`);
+    const respText = await response.text();
+    await test.info().attach('response-body', { body: respText, contentType: 'application/json' });
     expect(response.status()).toBe(401);
   });
 });

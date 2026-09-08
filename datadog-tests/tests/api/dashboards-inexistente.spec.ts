@@ -18,9 +18,11 @@ test.describe('API de Dashboards - DB-07 dashboard inexistente', () => {
     const response = await request.get(`${BASE_URL}/api/dashboards/dashboard-inexistente?timeRange=1h`, {
       headers: { Authorization: `Bearer ${token}` },
     });
+    const respText = await response.text();
+    await test.info().attach('response-body', { body: respText, contentType: 'application/json' });
 
     expect(response.status()).toBe(400);
-    const body = await response.json();
+    const body = JSON.parse(respText);
     expect(body.data).toBeNull();
     expect(body.error).toBeDefined();
     // Mensaje de error debe indicar que no fue encontrado o que el path es inválido
@@ -31,6 +33,8 @@ test.describe('API de Dashboards - DB-07 dashboard inexistente', () => {
 
   test('Dashboard inexistente: 401 sin token', async ({ request }) => {
     const response = await request.get(`${BASE_URL}/api/dashboards/dashboard-inexistente?timeRange=1h`);
+    const respText = await response.text();
+    await test.info().attach('response-body', { body: respText, contentType: 'application/json' });
     expect(response.status()).toBe(401);
   });
 });
