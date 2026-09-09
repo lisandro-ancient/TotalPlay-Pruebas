@@ -52,8 +52,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Install Playwright browsers
-        run: npx playwright install chromium
+      - name: Setup Playwright
+        uses: microsoft/playwright-github-action@v1
+        with:
+          # install only Chromium to reduce time; action also installs OS deps reliably
+          browsers: chromium
 
       - name: Run UI tests
         run: npx playwright test --project=ui
@@ -141,8 +144,10 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Install Playwright browsers
-        run: npx playwright install chromium
+      - name: Setup Playwright
+        uses: microsoft/playwright-github-action@v1
+        with:
+          browsers: chromium
 
       - name: Run WebSocket tests
         run: npx playwright test --project=websocket
