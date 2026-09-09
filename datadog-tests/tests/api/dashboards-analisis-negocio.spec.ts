@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { AuthClient } from '../../api/AuthClient';
 import { credentials } from '../../fixtures/testData';
+import { printResponse } from '../../utils/assertions';
 
 const BASE_URL = process.env.DD_BASE_URL || 'https://totalplay-dev.ancient.mx';
 
@@ -10,7 +11,10 @@ test.describe('API de Dashboards - analisis-negocio (DB-05)', () => {
   test.beforeAll(async ({ request }) => {
     const auth = new AuthClient(request);
     const response = await auth.login(credentials.username, credentials.password);
-    const body = await response.json();
+    const respText = await response.text();
+    await test.info().attach('response-body', { body: respText, contentType: 'application/json' });
+    await printResponse(respText, 'login response');
+    const body = JSON.parse(respText);
     token = body.data.accessToken;
   });
 
@@ -20,6 +24,7 @@ test.describe('API de Dashboards - analisis-negocio (DB-05)', () => {
     });
     const respText = await response.text();
     await test.info().attach('response-body', { body: respText, contentType: 'application/json' });
+    await printResponse(respText, 'dashboard-analisis-negocio response');
 
     expect(response.status()).toBe(200);
     const body = JSON.parse(respText);
@@ -58,6 +63,7 @@ test.describe('API de Dashboards - analisis-negocio (DB-05)', () => {
     const response = await request.get(`${BASE_URL}/api/dashboards/analisis-negocio`);
     const respText = await response.text();
     await test.info().attach('response-body', { body: respText, contentType: 'application/json' });
+    await printResponse(respText, 'dashboard-analisis-negocio unauthorized response');
     expect(response.status()).toBe(401);
   });
 });

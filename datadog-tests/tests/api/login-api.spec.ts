@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { AuthClient } from '../../api/AuthClient';
 import { credentials } from '../../fixtures/testData';
+import { printResponse } from '../../utils/assertions';
 
 test.describe('API de Autenticación - Inicio de sesión', () => {
   test('Iniciar sesión: credenciales válidas devuelve 201 y tokens', async ({ request }) => {
@@ -8,6 +9,7 @@ test.describe('API de Autenticación - Inicio de sesión', () => {
     const response = await client.login(credentials.username, credentials.password);
     const respText = await response.text();
     await test.info().attach('response-body', { body: respText, contentType: 'application/json' });
+    await printResponse(respText, 'login success response');
 
     expect(response.status()).toBe(201);
 
@@ -28,6 +30,7 @@ test.describe('API de Autenticación - Inicio de sesión', () => {
     const response = await client.login(credentials.username, credentials.password);
     const respText2 = await response.text();
     await test.info().attach('response-body', { body: respText2, contentType: 'application/json' });
+    await printResponse(respText2, 'login jwt payload response');
     const body = JSON.parse(respText2);
     const payload = JSON.parse(Buffer.from(body.data.accessToken.split('.')[1], 'base64').toString());
 
@@ -42,6 +45,7 @@ test.describe('API de Autenticación - Inicio de sesión', () => {
     const response = await client.login('wrong@totalplay.com', 'wrongpassword');
     const respText3 = await response.text();
     await test.info().attach('response-body', { body: respText3, contentType: 'application/json' });
+    await printResponse(respText3, 'login invalid credentials response');
 
     expect(response.status()).toBe(500);
 
@@ -56,6 +60,7 @@ test.describe('API de Autenticación - Inicio de sesión', () => {
     const response = await client.login('', '');
     const respText4 = await response.text();
     await test.info().attach('response-body', { body: respText4, contentType: 'application/json' });
+    await printResponse(respText4, 'login empty credentials response');
 
     expect(response.status()).toBe(400);
 

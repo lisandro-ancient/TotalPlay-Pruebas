@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { AuthClient } from '../../api/AuthClient';
 import { credentials } from '../../fixtures/testData';
+import { printResponse } from '../../utils/assertions';
 
 const BASE_URL = process.env.DD_BASE_URL || 'https://totalplay-dev.ancient.mx';
 
@@ -16,6 +17,7 @@ test.describe('API de Dashboards - DB-06 servicio-iptv / seis-servicios-iptv', (
       const text = await res.text();
       lastText = text;
       await test.info().attach('response-body', { body: text, contentType: 'application/json' });
+      await printResponse(text, 'fetchWithRetries response');
       if (!(res.status() >= 500 && res.status() < 600)) {
         try {
           return { response: res, text, json: JSON.parse(text) };
@@ -33,6 +35,7 @@ test.describe('API de Dashboards - DB-06 servicio-iptv / seis-servicios-iptv', (
     const response = await auth.login(credentials.username, credentials.password);
     const respText = await response.text();
     await test.info().attach('response-body', { body: respText, contentType: 'application/json' });
+    await printResponse(respText, 'login response');
     const body = JSON.parse(respText);
     token = body.data.accessToken;
   });
@@ -78,6 +81,7 @@ test.describe('API de Dashboards - DB-06 servicio-iptv / seis-servicios-iptv', (
     const response = await request.get(`${BASE_URL}/api/dashboards/servicio-iptv`);
     const respText = await response.text();
     await test.info().attach('response-body', { body: respText, contentType: 'application/json' });
+    await printResponse(respText, 'servicio-iptv unauthorized response');
     expect(response.status()).toBe(401);
   });
 
@@ -85,6 +89,7 @@ test.describe('API de Dashboards - DB-06 servicio-iptv / seis-servicios-iptv', (
     const response = await request.get(`${BASE_URL}/api/dashboards/seis-servicios-iptv`);
     const respText = await response.text();
     await test.info().attach('response-body', { body: respText, contentType: 'application/json' });
+    await printResponse(respText, 'seis-servicios-iptv unauthorized response');
     expect(response.status()).toBe(401);
   });
 });

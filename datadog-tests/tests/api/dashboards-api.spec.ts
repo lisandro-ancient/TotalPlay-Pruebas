@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { AuthClient } from '../../api/AuthClient';
 import { credentials } from '../../fixtures/testData';
+import { printResponse } from '../../utils/assertions';
 
 const BASE_URL = process.env.DD_BASE_URL || 'https://totalplay-dev.ancient.mx';
 
@@ -10,7 +11,11 @@ test.describe('API de Autenticación - Perfil', () => {
   test.beforeAll(async ({ request }) => {
     const auth = new AuthClient(request);
     const response = await auth.login(credentials.username, credentials.password);
-    const body = await response.json();
+    const respText = await response.text();
+    await test.info().attach('response-body', { body: respText, contentType: 'application/json' });
+    await printResponse(respText, 'auth-me response');
+    await printResponse(respText, 'login response');
+    const body = JSON.parse(respText);
     token = body.data.accessToken;
   });
 
@@ -20,6 +25,7 @@ test.describe('API de Autenticación - Perfil', () => {
     });
     const respText = await response.text();
     await test.info().attach('response-body', { body: respText, contentType: 'application/json' });
+    await printResponse(respText, 'auth-me timestamps response');
 
     expect(response.status()).toBe(200);
     const body = JSON.parse(respText);
@@ -44,6 +50,7 @@ test.describe('API de Autenticación - Perfil', () => {
     });
     const respText = await response.text();
     await test.info().attach('response-body', { body: respText, contentType: 'application/json' });
+    await printResponse(respText, 'auth-me unauthorized response');
     const body = JSON.parse(respText);
     expect(body.timestamp).toEqual(expect.any(Number));
     expect(new Date(body.data.createdAt).getTime()).toBeLessThan(Date.now());
@@ -54,6 +61,7 @@ test.describe('API de Autenticación - Perfil', () => {
     const response = await request.get(`${BASE_URL}/api/auth/me`);
     const respText = await response.text();
     await test.info().attach('response-body', { body: respText, contentType: 'application/json' });
+    await printResponse(respText, 'change-password success response');
     expect(response.status()).toBe(401);
   });
 
@@ -65,6 +73,7 @@ test.describe('API de Autenticación - Perfil', () => {
     });
     const respText = await response.text();
     await test.info().attach('response-body', { body: respText, contentType: 'application/json' });
+    await printResponse(respText, 'change-password wrong current response');
 
     expect(response.status()).toBe(200);
     const body = JSON.parse(respText);

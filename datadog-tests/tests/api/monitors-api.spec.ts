@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { AuthClient } from '../../api/AuthClient';
 import { credentials } from '../../fixtures/testData';
+import { printResponse } from '../../utils/assertions';
 
 const BASE_URL = process.env.DD_BASE_URL || 'https://totalplay-dev.ancient.mx';
 
@@ -61,6 +62,7 @@ test.describe('Users API', () => {
     });
     const createResText = await createRes.text();
     await test.info().attach('response-body', { body: createResText, contentType: 'application/json' });
+    await printResponse(createResText, 'create user response');
     const { data: created } = JSON.parse(createResText);
 
     const response = await request.patch(`${BASE_URL}/api/users/${created.id}/reset-password`, {
@@ -68,7 +70,10 @@ test.describe('Users API', () => {
     });
 
     expect(response.status()).toBe(200);
-    const body = await response.json();
+    const respTextPost = await response.text();
+    await test.info().attach('response-body', { body: respTextPost, contentType: 'application/json' });
+    await printResponse(respTextPost, 'reset-password response');
+    const body = JSON.parse(respTextPost);
     expect(body.error).toBeNull();
     expect(body.timestamp).toEqual(expect.any(Number));
   });
@@ -79,7 +84,10 @@ test.describe('Users API', () => {
     });
 
     expect(response.status()).toBe(404);
-    const body = await response.json();
+    const respText404 = await response.text();
+    await test.info().attach('response-body', { body: respText404, contentType: 'application/json' });
+    await printResponse(respText404, 'reset-password 404 response');
+    const body = JSON.parse(respText404);
     expect(body.data).toBeNull();
     expect(body.error).toContain('00000000-0000-0000-0000-000000000000');
     expect(body.timestamp).toEqual(expect.any(Number));
@@ -98,7 +106,10 @@ test.describe('Users API', () => {
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
       data: { email: `usr05.${Date.now()}@example.com`, password: 'password123', firstName: 'Active', lastName: 'User', role: 'admin' },
     });
-    const { data: created } = await createRes.json();
+    const createResText2 = await createRes.text();
+    await test.info().attach('response-body', { body: createResText2, contentType: 'application/json' });
+    await printResponse(createResText2, 'create user response');
+    const { data: created } = JSON.parse(createResText2);
 
     const response = await request.patch(`${BASE_URL}/api/users/${created.id}/status`, {
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
@@ -106,7 +117,10 @@ test.describe('Users API', () => {
     });
 
     expect(response.status()).toBe(200);
-    const body = await response.json();
+    const respText2 = await response.text();
+    await test.info().attach('response-body', { body: respText2, contentType: 'application/json' });
+    await printResponse(respText2, 'reset-password success response');
+    const body = JSON.parse(respText2);
     expect(body.error).toBeNull();
     expect(body.timestamp).toEqual(expect.any(Number));
     expect(body.data).toMatchObject({
@@ -121,7 +135,10 @@ test.describe('Users API', () => {
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
       data: { email: `usr05b.${Date.now()}@example.com`, password: 'password123', firstName: 'Inactive', lastName: 'User', role: 'admin' },
     });
-    const { data: created } = await createRes.json();
+    const createResText3 = await createRes.text();
+    await test.info().attach('response-body', { body: createResText3, contentType: 'application/json' });
+    await printResponse(createResText3, 'create user response');
+    const { data: created } = JSON.parse(createResText3);
 
     await request.patch(`${BASE_URL}/api/users/${created.id}/status`, {
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
@@ -134,7 +151,10 @@ test.describe('Users API', () => {
     });
 
     expect(response.status()).toBe(200);
-    const body = await response.json();
+    const respTextReact = await response.text();
+    await test.info().attach('response-body', { body: respTextReact, contentType: 'application/json' });
+    await printResponse(respTextReact, 'reactivate user response');
+    const body = JSON.parse(respTextReact);
     expect(body.data.isActive).toBe(true);
     expect(body.error).toBeNull();
   });
@@ -145,7 +165,10 @@ test.describe('Users API', () => {
       data: { isActive: false },
     });
     expect(response.status()).toBe(404);
-    const body = await response.json();
+    const respText404b = await response.text();
+    await test.info().attach('response-body', { body: respText404b, contentType: 'application/json' });
+    await printResponse(respText404b, 'change status 404 response');
+    const body = JSON.parse(respText404b);
     expect(body.data).toBeNull();
     expect(body.error).toContain('00000000-0000-0000-0000-000000000000');
   });
@@ -164,7 +187,10 @@ test.describe('Users API', () => {
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
       data: { email: `usr04.${Date.now()}@example.com`, password: 'password123', firstName: 'Original', lastName: 'User', role: 'admin' },
     });
-    const { data: created } = await createRes.json();
+    const createResText4 = await createRes.text();
+    await test.info().attach('response-body', { body: createResText4, contentType: 'application/json' });
+    await printResponse(createResText4, 'create user response');
+    const { data: created } = JSON.parse(createResText4);
 
     const response = await request.patch(`${BASE_URL}/api/users/${created.id}`, {
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
@@ -172,7 +198,10 @@ test.describe('Users API', () => {
     });
 
     expect(response.status()).toBe(200);
-    const body = await response.json();
+    const respTextUpdate = await response.text();
+    await test.info().attach('response-body', { body: respTextUpdate, contentType: 'application/json' });
+    await printResponse(respTextUpdate, 'update user response');
+    const body = JSON.parse(respTextUpdate);
     expect(body.error).toBeNull();
     expect(body.timestamp).toEqual(expect.any(Number));
     expect(body.data).toMatchObject({
@@ -193,7 +222,10 @@ test.describe('Users API', () => {
     });
 
     expect(response.status()).toBe(404);
-    const body = await response.json();
+    const respText404c = await response.text();
+    await test.info().attach('response-body', { body: respText404c, contentType: 'application/json' });
+    await printResponse(respText404c, 'update user 404 response');
+    const body = JSON.parse(respText404c);
     expect(body.data).toBeNull();
     expect(body.error).toContain('00000000-0000-0000-0000-000000000000');
     expect(body.timestamp).toEqual(expect.any(Number));
@@ -217,7 +249,10 @@ test.describe('Users API', () => {
     });
 
     expect(response.status()).toBe(201);
-    const body = await response.json();
+    const respTextCreate = await response.text();
+    await test.info().attach('response-body', { body: respTextCreate, contentType: 'application/json' });
+    await printResponse(respTextCreate, 'create admin user response');
+    const body = JSON.parse(respTextCreate);
     expect(body.error).toBeNull();
     expect(body.timestamp).toEqual(expect.any(Number));
     expect(body.data).toMatchObject({
@@ -238,7 +273,10 @@ test.describe('Users API', () => {
     });
 
     expect(response.status()).toBe(200);
-    const body = await response.json();
+    const respTextPage = await response.text();
+    await test.info().attach('response-body', { body: respTextPage, contentType: 'application/json' });
+    await printResponse(respTextPage, 'list users paged response');
+    const body = JSON.parse(respTextPage);
     expect(body.error).toBeNull();
     expect(body.timestamp).toEqual(expect.any(Number));
     expect(body.data.users).toBeInstanceOf(Array);
@@ -252,7 +290,10 @@ test.describe('Users API', () => {
     });
 
     expect(response.status()).toBe(200);
-    const body = await response.json();
+    const respTextSearch = await response.text();
+    await test.info().attach('response-body', { body: respTextSearch, contentType: 'application/json' });
+    await printResponse(respTextSearch, 'list users search response');
+    const body = JSON.parse(respTextSearch);
     expect(body.error).toBeNull();
     expect(body.timestamp).toEqual(expect.any(Number));
     expect(body.data.users.length).toBeGreaterThan(0);
@@ -269,7 +310,10 @@ test.describe('Users API', () => {
     });
 
     expect(response.status()).toBe(200);
-    const body = await response.json();
+    const respTextEmpty = await response.text();
+    await test.info().attach('response-body', { body: respTextEmpty, contentType: 'application/json' });
+    await printResponse(respTextEmpty, 'list users empty response');
+    const body = JSON.parse(respTextEmpty);
     expect(body.error).toBeNull();
     expect(body.data.users).toHaveLength(0);
     expect(body.data.total).toBe(0);
@@ -283,7 +327,10 @@ test.describe('Users API', () => {
     });
 
     expect(response.status()).toBe(409);
-    const body = await response.json();
+    const respText409 = await response.text();
+    await test.info().attach('response-body', { body: respText409, contentType: 'application/json' });
+    await printResponse(respText409, 'create duplicate user response');
+    const body = JSON.parse(respText409);
     expect(body.data).toBeNull();
     expect(body.error).toContain(credentials.username);
     expect(body.timestamp).toEqual(expect.any(Number));
@@ -306,7 +353,10 @@ test.describe('Users API', () => {
     });
 
     expect(response.status()).toBe(400);
-    const body = await response.json();
+    const respText400 = await response.text();
+    await test.info().attach('response-body', { body: respText400, contentType: 'application/json' });
+    await printResponse(respText400, 'create invalid body response');
+    const body = JSON.parse(respText400);
     expect(body.data).toBeNull();
     expect(body.error).toBe('Bad Request Exception');
   });

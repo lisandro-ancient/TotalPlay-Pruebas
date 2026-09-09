@@ -23,3 +23,34 @@ export async function expectStatus(response: APIResponse | any, status: number) 
   const body = await readResponseBody(response);
   expect(actual, `Expected status ${status} but got ${actual}. Body: ${body}`).toBe(status);
 }
+
+export async function printResponse(responseOrText: any, label = 'response-body') {
+  let text: string;
+  if (typeof responseOrText === 'string') {
+    text = responseOrText;
+  } else if (responseOrText && typeof responseOrText.text === 'function') {
+    try {
+      text = await responseOrText.text();
+    } catch (e: any) {
+      text = `<unable to read body: ${e?.message ?? e}>`;
+    }
+  } else {
+    try {
+      text = JSON.stringify(responseOrText);
+    } catch {
+      text = String(responseOrText);
+    }
+  }
+
+  let parsed: any;
+  try {
+    parsed = JSON.parse(text);
+  } catch {
+    parsed = text;
+  }
+
+  const out = { label, body: parsed };
+  // eslint-disable-next-line no-console
+  console.log(JSON.stringify(out, null, 2));
+  return text;
+}

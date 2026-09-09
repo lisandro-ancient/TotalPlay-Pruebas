@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { AuthClient } from '../../api/AuthClient';
 import { credentials } from '../../fixtures/testData';
+import { printResponse } from '../../utils/assertions';
 
 const BASE_URL = process.env.DD_BASE_URL || 'https://totalplay-dev.ancient.mx';
 
@@ -10,7 +11,10 @@ test.describe('API de Dashboards - DB-07 dashboard inexistente', () => {
   test.beforeAll(async ({ request }) => {
     const auth = new AuthClient(request);
     const response = await auth.login(credentials.username, credentials.password);
-    const body = await response.json();
+    const respText = await response.text();
+    await test.info().attach('response-body', { body: respText, contentType: 'application/json' });
+    await printResponse(respText, 'login response');
+    const body = JSON.parse(respText);
     token = body.data.accessToken;
   });
 
@@ -20,6 +24,7 @@ test.describe('API de Dashboards - DB-07 dashboard inexistente', () => {
     });
     const respText = await response.text();
     await test.info().attach('response-body', { body: respText, contentType: 'application/json' });
+    await printResponse(respText, 'dashboard-inexistente response');
 
     expect(response.status()).toBe(400);
     const body = JSON.parse(respText);
@@ -35,6 +40,7 @@ test.describe('API de Dashboards - DB-07 dashboard inexistente', () => {
     const response = await request.get(`${BASE_URL}/api/dashboards/dashboard-inexistente?timeRange=1h`);
     const respText = await response.text();
     await test.info().attach('response-body', { body: respText, contentType: 'application/json' });
+    await printResponse(respText, 'dashboard-inexistente unauthorized response');
     expect(response.status()).toBe(401);
   });
 });

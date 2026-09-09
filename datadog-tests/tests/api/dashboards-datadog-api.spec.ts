@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { AuthClient } from '../../api/AuthClient';
 import { credentials } from '../../fixtures/testData';
+import { printResponse } from '../../utils/assertions';
 
 const BASE_URL = process.env.DD_BASE_URL || 'https://totalplay-dev.ancient.mx';
 
@@ -10,7 +11,10 @@ test.describe('API de Dashboards', () => {
   test.beforeAll(async ({ request }) => {
     const auth = new AuthClient(request);
     const response = await auth.login(credentials.username, credentials.password);
-    const body = await response.json();
+    const respText = await response.text();
+    await test.info().attach('response-body', { body: respText, contentType: 'application/json' });
+    await printResponse(respText, 'login response');
+    const body = JSON.parse(respText);
     token = body.data.accessToken;
   });
 
@@ -21,6 +25,7 @@ test.describe('API de Dashboards', () => {
     });
     const respText = await response.text();
     await test.info().attach('response-body', { body: respText, contentType: 'application/json' });
+    await printResponse(respText, 'app-clientes metrics response');
 
     expect(response.status()).toBe(200);
     const body = JSON.parse(respText);
@@ -41,6 +46,7 @@ test.describe('API de Dashboards', () => {
     });
     const respText2 = await response.text();
     await test.info().attach('response-body', { body: respText2, contentType: 'application/json' });
+    await printResponse(respText2, 'app-clientes metrics shape response');
     const { data } = JSON.parse(respText2);
     const { metrics } = data;
 
@@ -58,6 +64,7 @@ test.describe('API de Dashboards', () => {
     });
     const respText3 = await response.text();
     await test.info().attach('response-body', { body: respText3, contentType: 'application/json' });
+    await printResponse(respText3, 'app-clientes resilient deltas response');
 
     expect(response.status()).toBe(200);
     const { data } = JSON.parse(respText3);
@@ -77,6 +84,7 @@ test.describe('API de Dashboards', () => {
     const response = await request.get(`${BASE_URL}/api/dashboards/app-clientes?timeRange=4h`);
     const respText4 = await response.text();
     await test.info().attach('response-body', { body: respText4, contentType: 'application/json' });
+    await printResponse(respText4, 'app-clientes unauthorized response');
     expect(response.status()).toBe(401);
   });
 
@@ -87,6 +95,7 @@ test.describe('API de Dashboards', () => {
     });
     const respText5 = await response.text();
     await test.info().attach('response-body', { body: respText5, contentType: 'application/json' });
+    await printResponse(respText5, 'non-existent dashboard response');
 
     expect(response.status()).toBe(400);
     const body = JSON.parse(respText5);
